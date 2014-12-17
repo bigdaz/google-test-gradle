@@ -1,0 +1,39 @@
+apply plugin: 'cpp'
+
+binaries.all {
+    if (it instanceof SharedLibraryBinarySpec) {
+        cppCompiler.define "GTEST_CREATE_SHARED_LIBRARY", "1"
+    }
+}
+
+model {
+    components {
+        entryPoint(NativeLibrarySpec) {
+            baseName 'gtest-entryPoint'
+            sources {
+                cpp(CppSourceSet) {
+                    exportedHeaders.srcDir 'include'
+                    source.srcDir 'src'
+                    source.include 'gtest_main.cc'
+                }
+            }
+        }
+        core(NativeLibrarySpec) {
+            baseName 'gtest-core'
+            sources {
+                cpp(CppSourceSet) {
+                    exportedHeaders.srcDir 'include'
+                    source.srcDir 'src'
+                    source.include 'gtest-all.cc'
+                    exportedHeaders.srcDir projectDir
+                }
+            }
+
+        }
+    }
+    platforms {
+        x86 {
+            architecture "x86"
+        }
+    }
+}
