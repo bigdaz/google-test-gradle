@@ -1,0 +1,42 @@
+model {
+    toolChains {
+        visualCpp(VisualCpp)
+        mingw(Gcc) {
+            path new File("C:/MinGW/bin")
+            target("mingw")
+        }
+        cygwin(Gcc) {
+            path new File("C:/cygwin/bin")
+            target("cygwin")
+        }
+        gcc(Gcc)
+        clang(Clang)
+    }
+    platforms {
+        win {
+            operatingSystem "windows"
+            architecture "x86"
+        }
+        mingw {
+            operatingSystem "windows"
+            architecture "sparc"
+        }
+        cygwin {
+            operatingSystem "windows"
+            architecture "sparc"
+        }
+        osx {
+            operatingSystem "osx"
+            architecture "x86"
+        }
+        linux {
+            operatingSystem "linux"
+            architecture "x86"
+        }
+    }
+    components {
+        all {
+            targetPlatforms "win", "mingw", "cygwin", "osx", "linux"
+        }
+    }
+}
