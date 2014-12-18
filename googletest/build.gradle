@@ -24,22 +24,9 @@ model {
                 }
             }
         }
-        gtest_main(NativeLibrarySpec) {
-            sources {
-                cpp(CppSourceSet) {
-                    exportedHeaders.srcDir "${genSrc}/gtest-1.7.0/include"
-                    exportedHeaders.srcDir "${genSrc}/gtest-1.7.0"
-                    source.srcDir "${genSrc}/gtest-1.7.0"
-                    source.include 'src/gtest-all.cc'
-                    source.include 'src/gtest_main.cc'
-                }
-            }
-
-        }
     }
 }
 apply from: 'platform-config.gradle'
-
 
 task buildStaticLibs {
     dependsOn binaries.withType(StaticLibraryBinary).matching {

@@ -18,12 +18,6 @@ model {
                     staticLibraryFile = file("${prebuiltPath}/lib/gtestStaticLibrary/${binary.targetPlatform.name}/${libName(binary, 'gtest')}")
                 }
             }
-            gtest_main {
-                headers.srcDir "${prebuiltPath}/include"
-                binaries.withType(StaticLibraryBinary) { binary ->
-                    staticLibraryFile = file("${prebuiltPath}/lib/gtest_mainStaticLibrary/${binary.targetPlatform.name}/${libName(binary, 'gtest_main')}")
-                }
-            }
         }
     }
     components {
@@ -32,13 +26,14 @@ model {
 }
 
 binaries.withType(TestSuiteBinarySpec) {
-    lib library: "gtest_main", linkage: "static"
+    lib library: "gtest", linkage: "static"
 }
 
 task unitTest
 
 binaries.withType(TestSuiteBinarySpec) {
-    if (it.buildable) {
+    // TODO:DAZ buildable is not being set correctly on test suite binaries
+    if (it.testedBinary.buildable) {
         println "Adding dependency on $it"
         // TODO: This should be it.tasks.run, which should use the install image of the test exe
         unitTest.dependsOn it.namingScheme.getTaskName("run")
