@@ -1,6 +1,6 @@
 apply plugin: 'cpp'
 
-def genSrc = "${buildDir}/src"
+def genSrc = "src"
 task extractSources(type: Sync) {
     from {zipTree("gtest-1.7.0.zip")}
     into "${genSrc}"
@@ -14,25 +14,24 @@ binaries.all {
 
 model {
     components {
-        entryPoint(NativeLibrarySpec) {
-            baseName 'gtest-entryPoint'
-            sources {
-                cpp(CppSourceSet) {
-                    exportedHeaders.srcDir "${genSrc}/gtest-1.7.0/include"
-                    source.srcDir "${genSrc}/gtest-1.7.0"
-                    source.include 'src/gtest_main.cc'
-                    lib library: 'core'
-                }
-            }
-        }
-        core(NativeLibrarySpec) {
-            baseName 'gtest-core'
+        gtest(NativeLibrarySpec) {
             sources {
                 cpp(CppSourceSet) {
                     exportedHeaders.srcDir "${genSrc}/gtest-1.7.0/include"
                     exportedHeaders.srcDir "${genSrc}/gtest-1.7.0"
                     source.srcDir "${genSrc}/gtest-1.7.0"
                     source.include 'src/gtest-all.cc'
+                }
+            }
+        }
+        gtest_main(NativeLibrarySpec) {
+            sources {
+                cpp(CppSourceSet) {
+                    exportedHeaders.srcDir "${genSrc}/gtest-1.7.0/include"
+                    exportedHeaders.srcDir "${genSrc}/gtest-1.7.0"
+                    source.srcDir "${genSrc}/gtest-1.7.0"
+                    source.include 'src/gtest-all.cc'
+                    source.include 'src/gtest_main.cc'
                 }
             }
 
