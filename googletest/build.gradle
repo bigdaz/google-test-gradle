@@ -40,3 +40,20 @@ model {
     }
 }
 apply from: 'platform-config.gradle'
+
+
+task buildStaticLibs {
+    dependsOn binaries.withType(StaticLibraryBinary).matching {
+        it.buildable
+    }
+}
+task publish(type: Copy) {
+    dependsOn buildStaticLibs
+    into "../publish"
+    from("${genSrc}/gtest-1.7.0/include") {
+        into "include"
+    }
+    from("${buildDir}/binaries") {
+        into "lib"
+    }
+}

@@ -1,0 +1,46 @@
+apply plugin: "cpp"
+apply plugin: "google-test"
+
+apply from: "../googletest/platform-config.gradle"
+
+def prebuiltPath = "../publish"
+
+def libName(def binary, def name) {
+    binary.targetPlatform.operatingSystem.windows ? "lib${name}.lib" : "lib${name}.a"
+}
+
+model {
+    repositories {
+        libs(PrebuiltLibraries) {
+            gtestcore {
+                headers.srcDir "${prebuiltPath}include"
+                binaries.withType(StaticLibraryBinary) { binary->
+                    staticLibraryFile = file("${prebuiltPath}/lib/coreStaticLibrary/${binary.targetPlatform.name}/${libName(binary, 'gtest-core')}")
+                }
+            }
+            gtestep {
+                headers.srcDir "${prebuiltPath}/include"
+                binaries.withType(StaticLibraryBinary) { binary ->
+                    staticLibraryFile = file("${prebuiltPath}/lib/entryPointStaticLibrary/${binary.targetPlatform.name}/${libName(binary, 'gtest-entryPoint')}")
+                }
+            }
+        }
+    }
+    components {
+         operators(NativeLibrarySpec)
+    }
+}
+
+binaries.withType(TestSuiteBinarySpec) {
+    lib library: "gtestcore", linkage: "static"
+    lib library: "gtestep", linkage: "static"
+}
+
+task unitTest
+
+binaries.withType(TestSuiteBinarySpec) {
+    if (it.buildable) {
+        // TODO: This should be it.tasks.run, which should use the install image of the test exe
+        unitTest.dependsOn it.namingScheme.getTaskName("run")
+    }
+}
