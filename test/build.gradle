@@ -27,6 +27,10 @@ model {
 
 binaries.withType(TestSuiteBinarySpec) {
     lib library: "gtest", linkage: "static"
+    
+    if (toolChain in Gcc) {
+        linker.args "-pthread"
+    }
 }
 
 task unitTest
