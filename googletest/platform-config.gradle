@@ -36,7 +36,9 @@ model {
     }
     components {
         all {
-            targetPlatforms "win", "mingw", "cygwin", "osx", "linux"
+            ["win", "mingw", "cygwin", "osx", "linux"].each {
+                targetPlatform it
+            }
         }
     }
 }

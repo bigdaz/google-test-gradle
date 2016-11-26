@@ -15,7 +15,7 @@ model {
             gtest {
                 headers.srcDir "${prebuiltPath}/include"
                 binaries.withType(StaticLibraryBinary) { binary->
-                    staticLibraryFile = file("${prebuiltPath}/lib/gtestStaticLibrary/${binary.targetPlatform.name}/${libName(binary, 'gtest')}")
+                    staticLibraryFile = file("${prebuiltPath}/lib/gtest/static/${binary.targetPlatform.name}/${libName(binary, 'gtest')}")
                 }
             }
         }
@@ -23,23 +23,23 @@ model {
     components {
          operators(NativeLibrarySpec)
     }
-}
+    binaries {
+        withType(TestSuiteBinarySpec) {
+            lib library: "gtest", linkage: "static"
 
-binaries.withType(TestSuiteBinarySpec) {
-    lib library: "gtest", linkage: "static"
-    
-    if (toolChain in Gcc) {
-        linker.args "-pthread"
+            if (toolChain in Gcc) {
+                linker.args "-pthread"
+            }
+        }
+    }
+    tasks {
+        unitTest(Task) {
+            dependsOn $.binaries.withType(NativeTestSuiteBinarySpec)
+                .findAll { it.buildable }
+                // TODO: This should be it.tasks.run, which should use the install image of the test exe
+                .collect { it.namingScheme.getTaskName("run") }
+            group "Verification"
+        }
     }
 }
 
-task unitTest
-
-binaries.withType(TestSuiteBinarySpec) {
-    // TODO:DAZ buildable is not being set correctly on test suite binaries
-    if (it.testedBinary.buildable) {
-        println "Adding dependency on $it"
-        // TODO: This should be it.tasks.run, which should use the install image of the test exe
-        unitTest.dependsOn it.namingScheme.getTaskName("run")
-    }
-}
