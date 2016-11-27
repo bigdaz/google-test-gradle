@@ -4,42 +4,49 @@ def genSrc = "src"
 task extractSources(type: Sync) {
     from {zipTree("gtest-1.7.0.zip")}
     into "${genSrc}"
-}
-
-binaries.all {
-    if (it instanceof SharedLibraryBinarySpec) {
-        cppCompiler.define "GTEST_CREATE_SHARED_LIBRARY", "1"
-    }
+	ext.sourceDir = "${genSrc}/gtest-1.7.0"
+	ext.headerDir = "${genSrc}/gtest-1.7.0"
 }
 
 model {
+    binaries {
+        all {
+            if (it instanceof SharedLibraryBinarySpec) {
+                cppCompiler.define "GTEST_CREATE_SHARED_LIBRARY", "1"
+            }
+        }
+    }
     components {
         gtest(NativeLibrarySpec) {
             sources {
-                cpp(CppSourceSet) {
+                cpp {
                     exportedHeaders.srcDir "${genSrc}/gtest-1.7.0/include"
                     exportedHeaders.srcDir "${genSrc}/gtest-1.7.0"
                     source.srcDir "${genSrc}/gtest-1.7.0"
                     source.include 'src/gtest-all.cc'
+					generatedBy extractSources
                 }
+            }
+        }
+    }
+    tasks {
+        buildStaticLibs(Task) {
+            dependsOn $.binaries.withType(StaticLibraryBinarySpec).findAll {
+                it.buildable
+            }
+        }
+        publish(Copy) {
+            dependsOn "buildStaticLibs"
+            group "Publication"
+            into "../publish"
+            from("${genSrc}/gtest-1.7.0/include") {
+                into "include"
+            }
+            from("${buildDir}/libs") {
+                into "lib"
             }
         }
     }
 }
 apply from: 'platform-config.gradle'
 
-task buildStaticLibs {
-    dependsOn binaries.withType(StaticLibraryBinary).matching {
-        it.buildable
-    }
-}
-task publish(type: Copy) {
-    dependsOn buildStaticLibs
-    into "../publish"
-    from("${genSrc}/gtest-1.7.0/include") {
-        into "include"
-    }
-    from("${buildDir}/binaries") {
-        into "lib"
-    }
-}
